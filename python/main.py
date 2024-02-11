@@ -137,3 +137,25 @@ def _split_filename(filename: str) -> list[str]:
     for i in range(reslen):
         res.append(filename[i * SPLIT_LEN:(i + 1) * SPLIT_LEN])
     return res
+
+
+class open(object):
+    def __init__(self, root_dir, filename, mode, *args, **kwargs):
+        import builtins
+        sf = _split_filename(filename)
+        real_dir = root_dir
+        for node in sf:
+            next_path = os.path.join(real_dir, node)
+            if os.path.exists(next_path):
+                real_dir = next_path
+            else:
+                break
+        real_path = os.path.join(real_dir, filename)
+        self._f = builtins.open(real_path, mode, *args, **kwargs)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._f.close()
+    
